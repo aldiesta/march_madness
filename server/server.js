@@ -10,6 +10,9 @@ const port = process.env.PORT || 5000;
 // Create a PostgreSQL pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Required for Heroku PostgreSQL
+  },
 });
 
 app.use(express.json());
