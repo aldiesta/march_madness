@@ -109,6 +109,50 @@ app.get('/api/owners/:owner_id/teams', async (req, res) => {
     }
   });
 
+  app.post('/api/draft', async (req, res) => {
+    try {
+      // Get all unassigned teams in a random order
+      const poolResult = await pool.query(
+        'SELECT * FROM teams WHERE owner_id IS NULL ORDER BY RANDOM()'
+      );
+      const teams = poolResult.rows;
+  
+      // Get all owners
+      const ownersResult = await pool.query('SELECT * FROM owners');
+      const owners = ownersResult.rows;
+  
+      if (teams.length === 0 || owners.length === 0) {
+        return res.status(400).json({ error: 'No available teams or owners' });
+      }
+  
+      let updates = [];
+      let numberOfAssignments = Math.min(owners.length, teams.length); // Assign one per owner
+  
+      for (let i = 0; i < numberOfAssignments; i++) {
+        const team = teams.shift(); // Remove a team from the available pool
+        updates.push(
+          pool.query(
+            'UPDATE teams SET owner_id = $1 WHERE id = $2 RETURNING *',
+            [owners[i].id, team.id]
+          )
+        );
+      }
+  
+      // Execute updates in parallel
+      const results = await Promise.all(updates);
+      
+      res.json({
+        message: `Drafted ${numberOfAssignments} team(s)`,
+        draftedTeams: results.map(result => result.rows[0])
+      });
+  
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to draft teams' });
+    }
+  });
+  
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
