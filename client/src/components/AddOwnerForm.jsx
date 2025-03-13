@@ -66,7 +66,7 @@ const OwnerList = () => {
       <AddOwnerForm onOwnerAdded={handleOwnerAdded} />
       <ul>
         {owners.map((owner) => (
-          <li key={owner.id}>{owner.name}</li>
+          <li key={owner.id}>{owner.name.toUpperCase()}</li>
         ))}
       </ul>
     </div>

@@ -4,18 +4,28 @@ const AddTeamForm = ({ addTeam }) => {
   const [teamName, setTeamName] = useState('');
   const [seed, setSeed] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const seedValue = parseInt(seed);
-    
-    // Ensure seed is a valid number between 1 and 16
-    if (teamName && seedValue >= 1 && seedValue <= 16) {
-      addTeam({ teamName, seed: seedValue });
-      setTeamName('');
-      setSeed('');
-    } else {
-      alert("Seed must be a number between 1 and 16.");
+    if (!teamName.trim()) return;
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/teams", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: teamName, seed }),
+      });
+  
+      if (response.ok) {
+        const newTeam = await response.json();
+        console.log("New team added:", newTeam); // Debugging
+        addTeam(newTeam); // Pass the full team object to state
+        setTeamName("");
+        setSeed(1);
+      }
+    } catch (error) {
+      console.error("Error adding team:", error);
     }
   };
   return (
