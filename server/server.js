@@ -1,11 +1,14 @@
 const express = require('express');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
+const cors = require("cors");
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+app.use(cors());
 
 // Create a PostgreSQL pool
 const pool = new Pool({
