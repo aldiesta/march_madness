@@ -69,33 +69,41 @@ app.get('/api/teams', async (req, res) => {
   }
 });
 
-// Route to randomly draft a team
-app.post('/api/draft', async (req, res) => {
-    try {
-      // Get all teams that have not been drafted (still in the pool)
-      const poolResult = await pool.query('SELECT * FROM teams WHERE owner_id IS NULL ORDER BY RANDOM() LIMIT 1');
-  
-      if (poolResult.rows.length === 0) {
-        return res.status(400).json({ error: 'No teams available in the pool' });
+// Route to randomly draft one team per owner per round
+app.post('/api/draft-round', async (req, res) => {
+  try {
+      // Get all available teams (unassigned)
+      const { rows: availableTeams } = await pool.query('SELECT * FROM teams WHERE owner_id IS NULL ORDER BY RANDOM()');
+      const { rows: owners } = await pool.query('SELECT * FROM owners');
+
+      if (availableTeams.length === 0 || owners.length === 0) {
+          return res.status(400).json({ error: "No teams or owners available for drafting." });
       }
-  
-      // Select the first available team
-      const team = poolResult.rows[0];
-  
-      // Now assign that team to the current owner (pass owner_id from the request)
-      const { owner_id } = req.body;
-  
-      const updatedTeam = await pool.query(
-        'UPDATE teams SET owner_id = $1 WHERE id = $2 RETURNING *',
-        [owner_id, team.id]
-      );
-  
-      res.json(updatedTeam.rows[0]);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Failed to draft team' });
-    }
-  });
+
+      let teamIndex = 0;
+      const updatedTeams = [];
+
+      for (const owner of owners) {
+          if (teamIndex >= availableTeams.length) break; // Stop if no more teams are left
+
+          const team = availableTeams[teamIndex];
+          teamIndex++;
+
+          // Assign the team to the owner
+          const { rows } = await pool.query(
+              'UPDATE teams SET owner_id = $1 WHERE id = $2 RETURNING *',
+              [owner.id, team.id]
+          );
+
+          updatedTeams.push(rows[0]); // Collect updated teams
+      }
+
+      res.json({ message: "Draft round completed.", draftedTeams: updatedTeams });
+  } catch (err) {
+      console.error("Error during draft round:", err);
+      res.status(500).json({ error: "Failed to complete draft round." });
+  }
+});
 
   // Route to get teams by owner_id
 app.get('/api/owners/:owner_id/teams', async (req, res) => {
@@ -195,6 +203,17 @@ app.delete('/api/teams', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete all teams' });
+  }
+});
+
+// Route to reset the draft
+app.post('/api/reset-draft', async (req, res) => {
+  try {
+      await pool.query('UPDATE teams SET owner_id = NULL');
+      res.json({ message: "All teams have been reset to the pool." });
+  } catch (err) {
+      console.error("Error resetting draft:", err);
+      res.status(500).json({ error: "Failed to reset draft" });
   }
 });
   

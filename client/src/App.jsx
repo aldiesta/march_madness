@@ -3,6 +3,7 @@ import "./App.css";
 import AddTeamForm from "./components/AddTeamForm";
 import TeamList from "./components/TeamList";
 import OwnerList from "./components/AddOwnerForm";
+import Draft from "./components/DraftComponent";
 
 function App() {
   const [teams, setTeams] = useState([]);
@@ -27,6 +28,7 @@ function App() {
       <AddTeamForm setTeams={setTeams} />
       <TeamList teams={teams} setTeams={setTeams} />
       <OwnerList />
+      <Draft />
     </div>
   );
 }
