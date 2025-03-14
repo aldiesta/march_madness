@@ -4,7 +4,7 @@ const TeamList = ({ teams, setTeams }) => {
       if (!confirmDelete) return;
   
       try {
-        const response = await fetch(`http://localhost:5000/api/teams/${teamId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/teams/${teamId}`, {
           method: "DELETE",
         });
   
@@ -21,7 +21,7 @@ const TeamList = ({ teams, setTeams }) => {
       if (!confirmDeleteAll) return;
   
       try {
-        const response = await fetch("http://localhost:5000/api/teams", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/teams`, {
           method: "DELETE",
         });
   

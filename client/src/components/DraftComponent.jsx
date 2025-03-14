@@ -13,7 +13,7 @@ const DraftComponent = () => {
 
   const fetchOwners = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/owners");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/owners`);
       const data = await response.json();
       setOwners(data);
       fetchTeamsForOwners(data);
@@ -26,7 +26,7 @@ const DraftComponent = () => {
     try {
       const updatedDraftedTeams = {};
       for (const owner of ownersList) {
-        const response = await fetch(`http://localhost:5000/api/owners/${owner.id}/teams`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/owners/${owner.id}/teams`);
         const teams = await response.json();
         updatedDraftedTeams[owner.id] = teams;
       }
@@ -39,7 +39,7 @@ const DraftComponent = () => {
 
   const fetchRemainingTeams = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/teams");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/teams`);
       const teams = await response.json();
       const unassignedTeams = teams.filter((team) => team.owner_id === null);
       setRemainingTeams(unassignedTeams);
@@ -76,7 +76,7 @@ const DraftComponent = () => {
 
     if (draftedTeamsThisRound.length > 0) {
       try {
-        const response = await fetch("http://localhost:5000/api/draft-round", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/draft-round`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -106,7 +106,7 @@ const DraftComponent = () => {
     setIsResetting(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/reset-draft", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reset-draft`, {
         method: "POST",
       });
 

@@ -8,7 +8,7 @@ const AddOwnerForm = ({ onOwnerAdded }) => {
     if (!name.trim()) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/owners", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +46,7 @@ const OwnerList = () => {
   useEffect(() => {
     const fetchOwners = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/owners");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}`);
         const data = await response.json();
         setOwners(data);
       } catch (error) {
@@ -64,7 +64,7 @@ const OwnerList = () => {
     if (!window.confirm("Are you sure you want to delete this owner?")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/owners/${ownerId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/owners/${ownerId}`, {
         method: "DELETE",
       });
 
@@ -80,7 +80,7 @@ const OwnerList = () => {
     if (!window.confirm("Are you sure you want to delete all owners? This action cannot be undone.")) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/owners", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}`, {
         method: "DELETE",
       });
 
