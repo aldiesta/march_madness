@@ -217,6 +217,11 @@ app.post('/api/reset-draft', async (req, res) => {
   
 
 // Start the server
+
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
