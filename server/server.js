@@ -151,6 +151,52 @@ app.get('/api/owners/:owner_id/teams', async (req, res) => {
       res.status(500).json({ error: 'Failed to draft teams' });
     }
   });
+
+  // Route to delete a single owner
+app.delete('/api/owners/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM owners WHERE id = $1', [id]);
+    res.json({ message: 'Owner deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete owner' });
+  }
+});
+
+// Route to delete all owners
+app.delete('/api/owners', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM owners');
+    res.json({ message: 'All owners deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete all owners' });
+  }
+});
+
+// Route to delete a single team
+ app.delete('/api/teams/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM teams WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete team' });
+  }
+});
+
+// Route to delete all teams
+app.delete('/api/teams', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM teams');
+    res.status(204).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete all teams' });
+  }
+});
   
 
 // Start the server

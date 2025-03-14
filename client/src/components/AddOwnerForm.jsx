@@ -6,7 +6,7 @@ const AddOwnerForm = ({ onOwnerAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-    
+
     try {
       const response = await fetch("http://localhost:5000/api/owners", {
         method: "POST",
@@ -15,7 +15,7 @@ const AddOwnerForm = ({ onOwnerAdded }) => {
         },
         body: JSON.stringify({ name }),
       });
-      
+
       if (response.ok) {
         const newOwner = await response.json();
         onOwnerAdded(newOwner);
@@ -60,13 +60,49 @@ const OwnerList = () => {
     setOwners((prevOwners) => [...prevOwners, newOwner]);
   };
 
+  // Function to delete a single owner
+  const deleteOwner = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/owners/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setOwners((prevOwners) => prevOwners.filter((owner) => owner.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting owner:", error);
+    }
+  };
+
+  // Function to delete all owners
+  const deleteAllOwners = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/owners", {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setOwners([]); // Clear all owners
+      }
+    } catch (error) {
+      console.error("Error deleting all owners:", error);
+    }
+  };
+
   return (
     <div>
       <h2>Owners</h2>
       <AddOwnerForm onOwnerAdded={handleOwnerAdded} />
+      <button onClick={deleteAllOwners} style={{ marginBottom: "10px", backgroundColor: "red", color: "white" }}>
+        Delete All Owners
+      </button>
       <ul>
         {owners.map((owner) => (
-          <li key={owner.id}>{owner.name.toUpperCase()}</li>
+          <li key={owner.id}>
+            {owner.name.toUpperCase()}  
+            <button onClick={() => deleteOwner(owner.id)}>
+              Delete
+            </button>
+          </li>
         ))}
       </ul>
     </div>
