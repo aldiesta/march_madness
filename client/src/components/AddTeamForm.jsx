@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-const AddTeamForm = ({ addTeam }) => {
-  const [teamName, setTeamName] = useState('');
-  const [seed, setSeed] = useState('');
+const AddTeamForm = ({ setTeams }) => {
+  const [teamName, setTeamName] = useState("");
+  const [seed, setSeed] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!teamName.trim()) return;
-  
+    if (!teamName.trim() || !seed) return;
+
     try {
       const response = await fetch("http://localhost:5000/api/teams", {
         method: "POST",
@@ -16,35 +16,37 @@ const AddTeamForm = ({ addTeam }) => {
         },
         body: JSON.stringify({ name: teamName, seed }),
       });
-  
+
       if (response.ok) {
         const newTeam = await response.json();
-        console.log("New team added:", newTeam); // Debugging
-        addTeam(newTeam); // Pass the full team object to state
+        setTeams((prevTeams) => [...prevTeams, newTeam]); // Update UI instantly
         setTeamName("");
-        setSeed(1);
+        setSeed(""); // Reset dropdown
       }
     } catch (error) {
       console.error("Error adding team:", error);
     }
   };
+
   return (
     <form onSubmit={handleSubmit}>
-    <input
-      type="text"
-      value={teamName}
-      onChange={(e) => setTeamName(e.target.value)}
-      placeholder="Enter team name"
-      required
-    />
-    <select value={seed} onChange={(e) => setSeed(e.target.value)} required>
-      <option value="">Select a Seed</option>
-      {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
-        <option key={num} value={num}>{num}</option>
-      ))}
-    </select>
-    <button type="submit">Add Team</button>
-  </form>
+      <input
+        type="text"
+        value={teamName}
+        onChange={(e) => setTeamName(e.target.value)}
+        placeholder="Enter team name"
+        required
+      />
+      <select value={seed} onChange={(e) => setSeed(e.target.value)} required>
+        <option value="">Select a Seed</option>
+        {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
+          <option key={num} value={num}>
+            {num}
+          </option>
+        ))}
+      </select>
+      <button type="submit">Add Team</button>
+    </form>
   );
 };
 

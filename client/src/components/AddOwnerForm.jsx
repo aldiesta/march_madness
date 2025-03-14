@@ -60,28 +60,32 @@ const OwnerList = () => {
     setOwners((prevOwners) => [...prevOwners, newOwner]);
   };
 
-  // Function to delete a single owner
-  const deleteOwner = async (id) => {
+  const deleteOwner = async (ownerId) => {
+    if (!window.confirm("Are you sure you want to delete this owner?")) return;
+
     try {
-      const response = await fetch(`http://localhost:5000/api/owners/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/owners/${ownerId}`, {
         method: "DELETE",
       });
+
       if (response.ok) {
-        setOwners((prevOwners) => prevOwners.filter((owner) => owner.id !== id));
+        setOwners((prevOwners) => prevOwners.filter((owner) => owner.id !== ownerId));
       }
     } catch (error) {
       console.error("Error deleting owner:", error);
     }
   };
 
-  // Function to delete all owners
   const deleteAllOwners = async () => {
+    if (!window.confirm("Are you sure you want to delete all owners? This action cannot be undone.")) return;
+
     try {
       const response = await fetch("http://localhost:5000/api/owners", {
         method: "DELETE",
       });
+
       if (response.ok) {
-        setOwners([]); // Clear all owners
+        setOwners([]);
       }
     } catch (error) {
       console.error("Error deleting all owners:", error);
@@ -92,16 +96,12 @@ const OwnerList = () => {
     <div>
       <h2>Owners</h2>
       <AddOwnerForm onOwnerAdded={handleOwnerAdded} />
-      <button onClick={deleteAllOwners} style={{ marginBottom: "10px", backgroundColor: "red", color: "white" }}>
-        Delete All Owners
-      </button>
+      {owners.length > 0 && <button onClick={deleteAllOwners} style={{ marginBottom: "10px", backgroundColor: "red", color: "white" }}>Delete All Owners</button>}
       <ul>
         {owners.map((owner) => (
           <li key={owner.id}>
-            {owner.name.toUpperCase()}  
-            <button onClick={() => deleteOwner(owner.id)}>
-              Delete
-            </button>
+            {owner.name.toUpperCase()}{" "}
+            <button onClick={() => deleteOwner(owner.id)}>Delete</button>
           </li>
         ))}
       </ul>
