@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import AddTeamForm from "./components/AddTeamForm";
 import TeamList from "./components/TeamList";
-import OwnerList from "./components/AddOwnerForm";
+import OwnerList from "./components/OwnerList";
 import Draft from "./components/DraftComponent";
 
 function App() {

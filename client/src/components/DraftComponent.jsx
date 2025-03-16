@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { Grid, Card, CardContent, Typography, Button, CircularProgress } from "@mui/material";
 
 const DraftComponent = () => {
   const [owners, setOwners] = useState([]);
   const [draftedTeams, setDraftedTeams] = useState({});
+  const [remainingTeams, setRemainingTeams] = useState([]);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [remainingTeams, setRemainingTeams] = useState([]);
 
   useEffect(() => {
     fetchOwners();
@@ -54,7 +55,6 @@ const DraftComponent = () => {
       return;
     }
 
-    // ✅ NEW CHECK: Prevent drafting if fewer teams than owners
     if (remainingTeams.length < owners.length) {
       alert("Not enough teams left to distribute evenly. The draft cannot proceed.");
       return;
@@ -62,36 +62,36 @@ const DraftComponent = () => {
 
     setIsDrafting(true);
 
-    let availableTeams = [...remainingTeams]; // Clone the remaining teams list
+    let availableTeams = [...remainingTeams];
     let draftedTeamsThisRound = [];
 
     for (const owner of owners) {
       if (availableTeams.length === 0) break; // Stop if no more teams left
 
       const randomIndex = Math.floor(Math.random() * availableTeams.length);
-      const team = availableTeams.splice(randomIndex, 1)[0]; // Remove team from available list
+      const team = availableTeams.splice(randomIndex, 1)[0];
 
       draftedTeamsThisRound.push({ owner_id: owner.id, team_id: team.id });
     }
 
-    if (draftedTeamsThisRound.length > 0) {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/draft-round`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(draftedTeamsThisRound),
-        });
+    // Send the batch draft request
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/draft-round`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(draftedTeamsThisRound),
+      });
 
-        if (!response.ok) {
-          console.log(`No more teams available.`);
-        }
-      } catch (error) {
-        console.error("Error drafting team:", error);
+      if (!response.ok) {
+        console.error("Error drafting teams in this round");
       }
+    } catch (error) {
+      console.error("Error drafting team:", error);
     }
 
+    // Refresh data
     setTimeout(() => {
       fetchTeamsForOwners();
       fetchRemainingTeams();
@@ -100,8 +100,7 @@ const DraftComponent = () => {
   };
 
   const handleResetDraft = async () => {
-    const confirmReset = window.confirm("Are you sure you want to reset the draft?");
-    if (!confirmReset) return;
+    if (!window.confirm("Are you sure you want to reset the draft?")) return;
 
     setIsResetting(true);
 
@@ -123,45 +122,71 @@ const DraftComponent = () => {
 
   return (
     <div>
-      <h2>Draft</h2>
-      <button onClick={handleDraftRound} disabled={isDrafting || remainingTeams.length === 0} style={{ marginBottom: "10px" }}>
-        {isDrafting ? "Drafting..." : "Draft Next Round"}
-      </button>
-      <button onClick={handleResetDraft} disabled={isResetting} style={{ marginLeft: "10px", backgroundColor: "red", color: "white" }}>
-        {isResetting ? "Resetting..." : "Reset Draft"}
-      </button>
+      <Typography variant="h4" gutterBottom>
+        Draft
+      </Typography>
+      <Button onClick={handleDraftRound} disabled={isDrafting || remainingTeams.length === 0} variant="contained" color="primary" sx={{ marginRight: 2 }}>
+        {isDrafting ? <CircularProgress size={24} /> : "Draft Next Round"}
+      </Button>
+      <Button onClick={handleResetDraft} disabled={isResetting} variant="contained" color="error">
+        {isResetting ? <CircularProgress size={24} /> : "Reset Draft"}
+      </Button>
 
-      <h3>Owners & Drafted Teams</h3>
-      <ul>
+      <Typography variant="h5" sx={{ marginTop: 3 }}>
+        Owners & Drafted Teams
+      </Typography>
+      <Grid container spacing={2}>
         {owners.map((owner) => (
-          <li key={owner.id}>
-            <strong>{owner.name.toUpperCase()}</strong>
-            <ul>
-              {draftedTeams[owner.id]?.length > 0 ? (
-                draftedTeams[owner.id].map((team) => (
-                  <li key={team.id}>{team.name.toUpperCase()} (Seed: {team.seed})</li>
-                ))
-              ) : (
-                <li>No teams drafted yet</li>
-              )}
-            </ul>
-          </li>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={owner.id}>
+            <Card sx={{ minHeight: 150 }}>
+              <CardContent>
+                <Typography variant="h6" align="center">
+                  {owner.name.toUpperCase()}
+                </Typography>
+                <Typography variant="subtitle2" align="center" color="textSecondary">
+                  Drafted Teams:
+                </Typography>
+                {draftedTeams[owner.id]?.length > 0 ? (
+                  <ul>
+                    {draftedTeams[owner.id].map((team) => (
+                      <li key={team.id}>{team.name.toUpperCase()} (Seed: {team.seed})</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Typography variant="body2" align="center" color="textSecondary">
+                    No teams drafted yet
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </ul>
+      </Grid>
 
-      <h3>Remaining Teams</h3>
-      <ul>
+      <Typography variant="h5" sx={{ marginTop: 3 }}>
+        Remaining Teams
+      </Typography>
+      <Grid container spacing={2}>
         {remainingTeams.length > 0 ? (
-          remainingTeams.map((team) => <li key={team.id}>{team.name.toUpperCase()} (Seed: {team.seed})</li>)
+          remainingTeams.map((team) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={team.id}>
+              <Card sx={{ minHeight: 100 }}>
+                <CardContent>
+                  <Typography variant="body1" align="center">
+                    {team.name.toUpperCase()} (Seed: {team.seed})
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
         ) : (
-          <li>No remaining teams</li>
+          <Typography variant="body2" color="textSecondary">
+            No remaining teams
+          </Typography>
         )}
-      </ul>
+      </Grid>
     </div>
   );
 };
 
 export default DraftComponent;
-
-
-
