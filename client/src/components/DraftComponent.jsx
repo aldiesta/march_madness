@@ -4,7 +4,6 @@ import { Grid, Card, CardContent, Typography, Button, CircularProgress } from "@
 const DraftComponent = () => {
   const [owners, setOwners] = useState([]);
   const [draftedTeams, setDraftedTeams] = useState({});
-  const [remainingTeams, setRemainingTeams] = useState([]);
   const [isDrafting, setIsDrafting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
@@ -32,69 +31,32 @@ const DraftComponent = () => {
         updatedDraftedTeams[owner.id] = teams;
       }
       setDraftedTeams(updatedDraftedTeams);
-      fetchRemainingTeams();
     } catch (error) {
       console.error("Error fetching teams for owners:", error);
     }
   };
 
-  const fetchRemainingTeams = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/teams`);
-      const teams = await response.json();
-      const unassignedTeams = teams.filter((team) => team.owner_id === null);
-      setRemainingTeams(unassignedTeams);
-    } catch (error) {
-      console.error("Error fetching remaining teams:", error);
-    }
-  };
-
   const handleDraftRound = async () => {
-    if (remainingTeams.length === 0) {
-      alert("No more teams available for drafting.");
-      return;
-    }
-
-    if (remainingTeams.length < owners.length) {
-      alert("Not enough teams left to distribute evenly. The draft cannot proceed.");
-      return;
-    }
-
     setIsDrafting(true);
 
-    let availableTeams = [...remainingTeams];
-    let draftedTeamsThisRound = [];
-
-    for (const owner of owners) {
-      if (availableTeams.length === 0) break; // Stop if no more teams left
-
-      const randomIndex = Math.floor(Math.random() * availableTeams.length);
-      const team = availableTeams.splice(randomIndex, 1)[0];
-
-      draftedTeamsThisRound.push({ owner_id: owner.id, team_id: team.id });
-    }
-
-    // Send the batch draft request
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/draft-round`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(draftedTeamsThisRound),
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        fetchTeamsForOwners();
+      } else {
         console.error("Error drafting teams in this round");
       }
     } catch (error) {
       console.error("Error drafting team:", error);
     }
 
-    // Refresh data
     setTimeout(() => {
-      fetchTeamsForOwners();
-      fetchRemainingTeams();
       setIsDrafting(false);
     }, 1000);
   };
@@ -110,8 +72,7 @@ const DraftComponent = () => {
       });
 
       if (response.ok) {
-        await fetchTeamsForOwners();
-        fetchRemainingTeams();
+        fetchTeamsForOwners();
       }
     } catch (error) {
       console.error("Error resetting draft:", error);
@@ -125,7 +86,7 @@ const DraftComponent = () => {
       <Typography variant="h4" gutterBottom>
         Draft
       </Typography>
-      <Button onClick={handleDraftRound} disabled={isDrafting || remainingTeams.length === 0} variant="contained" color="primary" sx={{ marginRight: 2 }}>
+      <Button onClick={handleDraftRound} disabled={isDrafting} variant="contained" color="primary" sx={{ marginRight: 2 }}>
         {isDrafting ? <CircularProgress size={24} /> : "Draft Next Round"}
       </Button>
       <Button onClick={handleResetDraft} disabled={isResetting} variant="contained" color="error">
@@ -149,7 +110,7 @@ const DraftComponent = () => {
                 {draftedTeams[owner.id]?.length > 0 ? (
                   <ul>
                     {draftedTeams[owner.id].map((team) => (
-                      <li key={team.id}>{team.name.toUpperCase()} (Seed: {team.seed})</li>
+                      <li key={team.id}>{team.name.toUpperCase()} ({team.seed})</li>
                     ))}
                   </ul>
                 ) : (
@@ -161,29 +122,6 @@ const DraftComponent = () => {
             </Card>
           </Grid>
         ))}
-      </Grid>
-
-      <Typography variant="h5" sx={{ marginTop: 3 }}>
-        Remaining Teams
-      </Typography>
-      <Grid container spacing={2}>
-        {remainingTeams.length > 0 ? (
-          remainingTeams.map((team) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={team.id}>
-              <Card sx={{ minHeight: 100 }}>
-                <CardContent>
-                  <Typography variant="body1" align="center">
-                    {team.name.toUpperCase()} (Seed: {team.seed})
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
-        ) : (
-          <Typography variant="body2" color="textSecondary">
-            No remaining teams
-          </Typography>
-        )}
       </Grid>
     </div>
   );
