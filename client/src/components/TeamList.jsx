@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Grid, Card, CardContent, Typography, Button, Box } from "@mui/material";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
 
 const TeamList = ({ teams, setTeams }) => {
   const [sortedTeams, setSortedTeams] = useState([]);
@@ -85,8 +87,7 @@ const TeamList = ({ teams, setTeams }) => {
               }}
             >
               <CardContent>
-                <Typography variant="h6">{team.name.toUpperCase()}</Typography>
-                <Typography variant="body2">Seed: {team.seed}</Typography>
+                <Typography variant="h6">{team.name.toUpperCase()} ({team.seed})</Typography>
                 {!team.owner_id && (
                   <Button
                     variant="contained"
@@ -95,7 +96,7 @@ const TeamList = ({ teams, setTeams }) => {
                     sx={{ mt: 1 }}
                     onClick={() => deleteTeam(team.id)}
                   >
-                    Delete
+                    <i class="bi bi-trash-fill"></i>
                   </Button>
                 )}
               </CardContent>

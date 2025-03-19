@@ -37,7 +37,9 @@ const AddOwnerForm = ({ onOwnerAdded }) => {
         placeholder="Enter owner name"
         required
       />
-      <button type="submit">Add Owner</button>
+      <button type="submit" style={{backgroundColor: "green", marginLeft: "10px"}}>
+        Add Owner
+      </button>
     </form>
   );
 };

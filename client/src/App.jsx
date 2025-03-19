@@ -28,7 +28,7 @@ function App() {
       <AddTeamForm setTeams={setTeams} />
       <TeamList teams={teams} setTeams={setTeams} />
       <OwnerList />
-      <Draft />
+      <Draft style={{marginTop: "30px"}}/>
     </div>
   );
 }

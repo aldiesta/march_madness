@@ -37,7 +37,7 @@ const AddTeamForm = ({ setTeams }) => {
         placeholder="Enter team name"
         required
       />
-      <select value={seed} onChange={(e) => setSeed(e.target.value)} required>
+      <select value={seed} onChange={(e) => setSeed(e.target.value)} required style={{marginLeft: "10px"}}>
         <option value="">Select a Seed</option>
         {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
           <option key={num} value={num}>
@@ -45,7 +45,7 @@ const AddTeamForm = ({ setTeams }) => {
           </option>
         ))}
       </select>
-      <button type="submit">Add Team</button>
+      <button type="submit" style={{backgroundColor: "green", marginLeft: "10px"}}>Add Team</button>
     </form>
   );
 };

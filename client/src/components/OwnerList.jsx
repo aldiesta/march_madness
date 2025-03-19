@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, Typography, Button, Grid, Box } from "@mui/material";
 import AddOwnerForm from "./AddOwnerForm";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
 
 const OwnerList = () => {
   const [owners, setOwners] = useState([]);
@@ -64,7 +66,7 @@ const OwnerList = () => {
   return (
     <Box sx={{ textAlign: "center", mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Owners
+        Owners 
       </Typography>
       <AddOwnerForm onOwnerAdded={handleOwnerAdded} />
 
@@ -92,7 +94,7 @@ const OwnerList = () => {
                   onClick={() => deleteOwner(owner.id)}
                   sx={{ mt: 1 }}
                 >
-                  Delete
+                  <i class="bi bi-trash-fill"></i>
                 </Button>
               </CardContent>
             </Card>
